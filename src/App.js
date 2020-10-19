@@ -3,31 +3,42 @@ import { findRenderedComponentWithType } from "react-dom/test-utils";
 import "./App.css";
 import Person from "./Person/Person";
 import ErrorBoundary from "./ErrorBoundary/ErrorBoundary";
+//import Radium,  { StyleRoot } from 'radium'
 
 //function App() {
 class App extends Component {
   state = {
     persons: [
-      { name: "Dodo", age: 17 },
-      { name: "Radku", age: 24 },
-      { name: "Azaza", age: 30 },
+      { id: "1", name: "Dodo", age: 17 },
+      { id: "2", name: "Radku", age: 24 },
+      { id: "3", name: "Azaza", age: 30 },
     ],
     showPersons: false,
   };
 
   deletePersonHandler = (personIndex) => {
-    const persons = this.state.persons
+    const persons = [...this.state.persons]
     persons.splice(personIndex, 1)
     this.setState({persons:persons})
   }
 
-  nameChangeHandler = (event) => {
+  nameChangeHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id
+    });
+
+    const person = {
+      ...this.state.persons[personIndex]
+    }
+
+    person.name = event.target.value
+
+    const persons = [...this.state.persons]
+    persons[personIndex] = person
+
+
     this.setState({
-      persons: [
-        { name: event.target.value, age: 17 },
-        { name: "Radku", age: 18 },
-        { name: "Azaza", age: 30 },
-      ],
+      persons: persons
     });
   };
 
@@ -39,10 +50,15 @@ class App extends Component {
   render() {
     //css
     const style = {
-      backgroundColor: "white",
+      backgroundColor: "green",
+      color: "white",
       font: "ingerit",
       border: "1x solid blue",
       padding: "8px",
+      ":hover": {
+        backgroundColor: "lightgreen", 
+        color: "black"
+      }
     };
 
     let persons = null
@@ -53,16 +69,34 @@ class App extends Component {
         {this.state.persons.map((person, index) => {
           return <Person 
           click={() => this.deletePersonHandler(index)}
-          name={person.name} age={person.age} />
+          name={person.name} age={person.age} key={person.id}
+          changed = {(event) => this.nameChangeHandler(event, person.id)}
+           />
         })}
           </div>
       )
+        //dynamic style, toggle by switch showPersons
+      style.backgroundColor = "red";
+      style[":hover"] = {
+        backgroundColor: "salmon", 
+        color: "black"
+      }
+    }
+
+    //dynamic classes AND className = {classes.join(' ')}
+    const classes = []
+    if (this.state.persons.length <= 2) {
+      classes.push('red')
+    }
+    if (this.state.persons.length <= 1) {
+      classes.push('bold')
     }
 
     return (
+   //   <StyleRoot>
       <div className="App">
         <h1>Hi, Im react app</h1>
-      
+        <p className={classes.join(' ')}>This is working</p>
         <button style={style} onClick={this.togglePersonHandler}>
           Change state
         </button>
@@ -88,8 +122,8 @@ class App extends Component {
             </Person>
           </div>
          : null} */}
-         
       </div>
+   //   </StyleRoot>
       //React.createElement('div', {className:'App'}, (React.createElement('div', null, "does it work?")))
     );
   }
